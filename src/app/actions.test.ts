@@ -23,7 +23,7 @@ global.File = class MockFile extends Blob {
   async text(): Promise<string> {
     return super.text()
   }
-} as any
+} as typeof File
 
 describe('processFileAction', () => {
   it('should return error when no file is provided', async () => {
