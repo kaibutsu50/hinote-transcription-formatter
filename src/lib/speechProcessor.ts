@@ -33,12 +33,38 @@ async function* parseSpeechStream(content: string): AsyncGenerator<SpeechData> {
         throw new Error(`Error: 3行目が空行ではありません (Line: ${lineCount + 1})`);
       }
       if (speakerLine) {
-        const speakerMatch = speakerLine.match(/.*\s([^:]+):/);
+        const speakerMatch = speakerLine.match(/(.*):/);
         if (speakerMatch && speakerMatch[1]) {
-          yield {
-            speaker: speakerMatch[1].trim(),
-            body: bodyLine.trim()
-          };
+          // タイムスタンプや時刻情報を除去して話者名を抽出
+          let cleanSpeaker = speakerMatch[1].trim();
+          
+          // 複数の時刻形式を除去
+          cleanSpeaker = cleanSpeaker
+            .replace(/^\d{2}:\d{2}:\d{2}\s*-\s*\d{2}:\d{2}:\d{2}\s*/, '') // 00:00:27 - 00:00:29
+            .replace(/^\[\d{1,2}:\d{2}\]\s*/, '') // [10:30]
+            .replace(/^\d{1,2}:\d{2}\s*/, '') // 12:30  
+            .replace(/^時刻情報\s*/, '') // 「時刻情報 」
+            .trim();
+          
+          // 日本語の名前を抽出 (最後の単語が日本語文字を含む場合)
+          if (cleanSpeaker.includes(' ')) {
+            const parts = cleanSpeaker.split(/\s+/).filter(part => part.trim() !== '');
+            // 最後の部分が日本語文字を含むか確認
+            for (let i = parts.length - 1; i >= 0; i--) {
+              if (/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(parts[i])) {
+                cleanSpeaker = parts[i];
+                break;
+              }
+            }
+          }
+          
+          // 空の場合はスキップ
+          if (cleanSpeaker) {
+            yield {
+              speaker: cleanSpeaker,
+              body: bodyLine.trim()
+            };
+          }
         }
       }
       speakerLine = "";
@@ -50,12 +76,38 @@ async function* parseSpeechStream(content: string): AsyncGenerator<SpeechData> {
   
   // 最後のデータを処理
   if (speakerLine) {
-    const speakerMatch = speakerLine.match(/.*\s([^:]+):/);
+    const speakerMatch = speakerLine.match(/(.*):/);
     if (speakerMatch && speakerMatch[1]) {
-      yield {
-        speaker: speakerMatch[1].trim(),
-        body: bodyLine.trim()
-      };
+      // タイムスタンプや時刻情報を除去して話者名を抽出
+      let cleanSpeaker = speakerMatch[1].trim();
+      
+      // 複数の時刻形式を除去
+      cleanSpeaker = cleanSpeaker
+        .replace(/^\d{2}:\d{2}:\d{2}\s*-\s*\d{2}:\d{2}:\d{2}\s*/, '') // 00:00:27 - 00:00:29
+        .replace(/^\[\d{1,2}:\d{2}\]\s*/, '') // [10:30]
+        .replace(/^\d{1,2}:\d{2}\s*/, '') // 12:30
+        .replace(/^時刻情報\s*/, '') // 「時刻情報 」
+        .trim();
+      
+      // 日本語の名前を抽出 (最後の単語が日本語文字を含む場合)
+      if (cleanSpeaker.includes(' ')) {
+        const parts = cleanSpeaker.split(/\s+/).filter(part => part.trim() !== '');
+        // 最後の部分が日本語文字を含むか確認
+        for (let i = parts.length - 1; i >= 0; i--) {
+          if (/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(parts[i])) {
+            cleanSpeaker = parts[i];
+            break;
+          }
+        }
+      }
+      
+      // 空の場合はスキップ
+      if (cleanSpeaker) {
+        yield {
+          speaker: cleanSpeaker,
+          body: bodyLine.trim()
+        };
+      }
     }
   }
 }
@@ -86,6 +138,7 @@ async function* concatSpeakerSpeechesStream(content: string): AsyncGenerator<Spe
   
   // 最後の発話を出力
   if (currentSpeech) {
+    currentSpeech.body = currentSpeech.body.replace(/、$/, "。");
     yield currentSpeech;
   }
 }

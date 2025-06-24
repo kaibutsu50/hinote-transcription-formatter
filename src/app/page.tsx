@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import FileUpload from '@/components/FileUpload';
 import DownloadButton from '@/components/DownloadButton';
+import { processFileAction } from './actions';
 
 export default function Home() {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -19,16 +20,12 @@ export default function Home() {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch('/api/process', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      const result = await response.json();
+      const result = await processFileAction(formData);
+      console.log(result)
       
       if (result.success) {
-        setProcessedContent(result.content);
-        setFilename(result.filename);
+        setProcessedContent(result.content || '');
+        setFilename(result.filename || '');
       } else {
         setError(result.error || '処理に失敗しました');
       }
