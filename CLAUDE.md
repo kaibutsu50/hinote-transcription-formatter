@@ -51,3 +51,8 @@ Each speech entry consists of exactly 4 lines: speaker line, empty line, content
 - React 19 for UI components
 - GitHub Actions for deployment automation
 - Configured for GitHub Pages hosting with static export
+
+### WSL Path Convention
+- **Important**: When working in WSL, always use `/mnt/c/` paths instead of `C:\` Windows paths
+- **Example**: `C:\Users\eto\OneDrive\画像` → `/mnt/c/Users/eto/OneDrive/画像`
+- This applies to all file operations including screenshots and Unity log files
