@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import FileUpload from '@/components/FileUpload';
 import DownloadButton from '@/components/DownloadButton';
-import { processFileAction } from './actions';
+import { processSpeechFile } from '@/lib/speechProcessor';
 
 export default function Home() {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -17,20 +17,18 @@ export default function Home() {
     setProcessedContent('');
     
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const result = await processFileAction(formData);
-      console.log(result)
-      
-      if (result.success) {
-        setProcessedContent(result.content || '');
-        setFilename(result.filename || '');
-      } else {
-        setError(result.error || '処理に失敗しました');
+      if (!file.name.endsWith('.txt')) {
+        setError('テキストファイル（.txt）のみサポートしています');
+        return;
       }
+      
+      const content = await file.text();
+      const processedContent = await processSpeechFile(content);
+      
+      setProcessedContent(processedContent);
+      setFilename(file.name.replace('.txt', '_processed.txt'));
     } catch (err) {
-      setError('ネットワークエラーが発生しました');
+      setError(err instanceof Error ? err.message : '処理に失敗しました');
     } finally {
       setIsProcessing(false);
     }
