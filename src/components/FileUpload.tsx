@@ -78,6 +78,9 @@ export default function FileUpload({ onFileUpload, isProcessing }: FileUploadPro
             fill="none" 
             stroke="currentColor" 
             viewBox="0 0 24 24"
+            width="48"
+            height="48"
+            style={{ width: '3rem', height: '3rem' }}
           >
             <path 
               strokeLinecap="round" 
