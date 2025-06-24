@@ -34,16 +34,14 @@ jobs:
           
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        working-directory: ./hinote-web
         
       - name: Build
         run: pnpm build
-        working-directory: ./hinote-web
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./hinote-web/out
+          path: ./out
 
   deploy:
     environment:
