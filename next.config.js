@@ -2,8 +2,8 @@
 const nextConfig = {
   output: 'export',
   trailingSlash: true,
-  basePath: process.env.GITHUB_ACTIONS ? '/hinote' : '',
-  assetPrefix: process.env.GITHUB_ACTIONS ? '/hinote' : '',
+  basePath: process.env.GITHUB_ACTIONS ? '/hinote-transcription-formatter' : '',
+  assetPrefix: process.env.GITHUB_ACTIONS ? '/hinote-transcription-formatter' : '',
   images: {
     unoptimized: true
   }
